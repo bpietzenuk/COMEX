@@ -9,6 +9,8 @@ System requirements:
 - samtools and bedtools needed
 - spreadsheet program i.e. Microsoft Excel or LibreOffice Spreadsheet
 
+You can download the used python-scripts here:
+https://github.com/bpietzenuk/COMEX/blob/bpietzenuk-patch-1/Comex-Scripts%20v1.0.rar
 
 ################### COMEX Pipeline ##########################
 1- 	Short read sequences mapping file .bam is a binary file which has to be converted into .sam file format for further work
