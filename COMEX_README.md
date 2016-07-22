@@ -76,17 +76,21 @@ Step 2: Counting mapped reads per TE using qualimap
 
    Command Line: qualimap comp-counts [-algorithm <arg>] -bam <arg> -gtf <arg> [-id <arg>] [-out <arg>] [-protocol <arg>] [-type <arg>]
 
-	-algorithm <arg>	-uniquely-mapped-reads(default) or proportional
-	-b                 	- calculate 5' and 3' coverage bias
- 	-bam <arg>         	- mapping file in BAM format)
- 	-gtf <arg>         	- region file in GTF format
- 	-id <arg>          	- attribute of the GTF to be used as feature ID. Regions with
-                    		the same /ID will be aggregated as part of the same feature.
-                    		Default: gene_id.
- 	-out <arg>         	- path to output file
- 	-protocol <arg>    	- forward-stranded,reverse-stranded or non-strand-specific
- 	-type <arg>        	- Value of the third column of the GTF considered for
-                    		counting. Other types will be ignored. Default: exon 
+	-algorithm <arg> uniquely-mapped-reads(default) or proportional
+	
+	-b calculate 5' and 3' coverage bias
+	
+ 	-bam <arg> mapping file in BAM format)
+ 	
+ 	-gtf <arg> region file in GTF format
+ 	
+ 	-id <arg> attribute of the GTF to be used as feature ID. Regions with the same /ID will be 					aggregated as part of the same feature. Default: gene_id.
+                    		
+ 	-out <arg> path to output file
+ 	
+ 	-protocol <arg> forward-stranded,reverse-stranded or non-strand-specific
+ 	
+ 	-type <arg> Value of the third column of the GTF considered for counting. Other types will 					be ignored. Default: exon 
 
 Step 10: Manual calculation of RPKM using spreadsheet
 ---
