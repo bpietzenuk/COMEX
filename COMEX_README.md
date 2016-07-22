@@ -9,124 +9,89 @@ Analysis of transcript amounts from transposable elements (TEs) using RNA-sequen
 System requirements
 ---
 
-
-1. Pipeline were tested under MacOSX and Linux
+1. Pipeline were tested under Mac OS and Linux
 2. samtools and bedtools needed
 3. spreadsheet program i.e. Microsoft Excel or LibreOffice Spreadsheet
 
 COMEX Pipeline
 ---
 
-Step 1
+Step 1: Discard multiple-mapping reads that map across TE-families 
 ---
 
-Short read sequences mapping file .bam is a binary file which has to be converted into .sam file format for further work
+Within this step the mapped-reads will be checked for multiple mapping across different TE families and subsequently discarded if so. This step is merged into a single pipeline that runs via a shell-script. Pipeline-scripts are in pyhton. Corresponding scripts are provided. All files need to be in the same folder. We recommend using one filder for each library. The script runs from 35 minutes up to 12 hours depending on the number of reads and the technical specifications.
 
-   COMMAND LINE: Ex- samtools view -h filename.bam > filename.sam
-
-   Converted .sam-file will be used here for further processing. It is required to get cordinates for reads mapping.
-
-Step 2
----
-
-For further processing of the sam-file ends need to be generated. Output file will be generated within the script and has to be named within the script before running.
-
-   SCRIPT: "ToPrint_end.py"
-
-   COMMAND LINE: python toprint_end.py 
-
-Step 3
----
-
-Removes the cases of mapping errors. It will remove all three possible mapping errors: 
-
-1. same read id mapping to different position with same start and different end (on same chromosome) accept shorter in length
-2. same read id mapping to different position  with different end and same end( same chromosome) accept shorter in length
-3. same read id mapping at same position on same chromosome
-
-   Output file will be generated as name in script, and output name can be changed within the script before running.
- 
-   SCRIPT: "Selectnonrepeated.py"
-
-   COMMAND LINE: python Selectnonrepeated.py
-
-Step 4
----
-
-Creates two files: MULTIPLE and UNIQUELY mapped reads.
-
-Output files will be generated within the script and need to be named within the script before running. Infile has to be defined previously within the script.
-
-   SCRIPT: "Selectmultiplemapped.py"
-
-   Command Line: python selectmultiplemapped.py
-
-Step 5
----
-
-This step will remove the reads which are mapping across TE families from multiple mapping file.
-
-Reference .gff annotation file needed. The location and the name of infile (multiple mapping reads from previous step)has to be defined previously within the script. Outfile name has to be defined in command line
-
-   SCRIPT: "new_cases.py"
-
-   Command Line: python new_cases.py > filename.sam
-
-Step 6
----
-
-Uniquely mapping reads and outfile from previous step (multiple mapping reads NOT across TE families) have to be merged for further analysis file. 
-
-   Command Line: cat multiple_corrected.sam uniquely-mapped.sam > filename.sam
-
-Step 7
----
-
-Remove the ends generated in step 2. Otherwise the program will change the .sam file format, and will compromise its use for read counting. Infile has to be defined within the script. Outfile has to be defindes in output-file.
+	SCRIPT: "comex2.0.sh"
 	
-   SCRIPT: "Remove_end.py"
+	COMMAN LINE: ./comex2.0
+	subsequently you will be asked to name mapping.bam-file, annotation-file and genome.fas (genome.fas needs to be indexed)
 
-   Command Line: python remove_end.py > outfile_name.sam
+EXAMPLE
 
-Step 8
----
+Tasks of comet.sh
+-
+1. 	Short read sequences mapping file .bam is a binary file which is to be converted into .sam file format for further processing. It is required to get cordinates for reads mapping.
 
-Outfile from the previous step has to be converted into bam-file again.
+   SCRIPT: samtools view -h $InputBam >$input'.sam'
+
+2. 	For further processing of the sam-file ends need to be generated. Output file will be generated within the script and has to be named within the script before running.
+
+   SCRIPT: "ToPrint_end1.py"
+
+3. 	Removes the cases of mapping errors. It will remove all three possible mapping errors: 
+	- same read id mapping to different position with same start and different end (on same chromosome) accept shorter in length
+	- same read id mapping to different position  with different end and same end( same chromosome) accept shorter in length
+	- same read id mapping at same position on same chromosome
+ 
+   SCRIPT: "Selectnonrepeated1.py"
+
+4. 	Divides the reads mapped into multiple and uniquel mapping reads. Therefore it cretes two files: MULTIPLE and UNIQUELY mapped reads.
+
+   SCRIPT: "Selectmultiplemapped1.py"
+
+5. 	Removes the reads which are mapping across TE families from multiple mapping file. For this step the annotation file is needed, it is used to determine the location of TEs and their family affilliation.
+
+   SCRIPT: "new_cases1.py"
+
+5. 	Uniquely mapping reads and outfile from previous step (multiple mapping reads that do not map across TE families) are merged for further analysis. 
+
+   SCRIPT: cat $input'_multiplecorrected.sam' $input'_uniquelymapped_reads.sam' >$input'_merged.sam'
+
+6. 	Removes the ends generated in step 2. Otherwise the program will change the .sam file format, and will compromise its use for read counting.
+	
+   SCRIPT: "Remove_end1.py"
+
+7. 	Outfile from the previous step is converted into bam-file.
 
    Command Line: samtools view -bT refference_genome.fa outfile_prev_step.sam > outfile.bam
 
-Step 9
+- shell Script ends here
+
+Step 2: Counting mapped reads per TE using qualimap
 ---
 
-Read counts for annotation will be generated. Annotation file should be in a gtf format.
-
-   Here we used qualimapV0.8
+- Read counts for annotation will be generated. Annotation file should be in a gtf format.
 
    http://qualimap.bioinfo.cipf.es/doc_html/command_line.html
 
    Command Line: qualimap comp-counts [-algorithm <arg>] -bam <arg> -gtf <arg> [-id <arg>] [-out <arg>] [-protocol <arg>] [-type <arg>]
- 
-   -algorithm   ----uniquely-mapped-reads(default) or proportional
 
-   -b           ----calculate 5' and 3' coverage bias
+ -algorithm <arg>   uniquely-mapped-reads(default) or proportional
+ -b                 calculate 5' and 3' coverage bias
+ -bam <arg>         mapping file in BAM format)
+ -gtf <arg>         region file in GTF format
+ -id <arg>          attribute of the GTF to be used as feature ID. Regions with
+                    the same /ID will be aggregated as part of the same feature.
+                    Default: gene_id.
+ -out <arg>         path to output file
+ -protocol <arg>    forward-stranded,reverse-stranded or non-strand-specific
+ -type <arg>        Value of the third column of the GTF considered for
+                    counting. Other types will be ignored. Default: exon 
 
-   -bam         ----mapping file in BAM format)
-
-   -gtf         ----region file in GTF format
-
-   -id          ----attribute of the GTF to be used as feature ID. Regions with the same /ID will be aggregated as part of the same feature.Default: gene_id.
-
-   -out         ----path to output file
-
-   -protocol    ----forward-stranded,reverse-stranded or non-strand-specific
-
-   -type        ----Value of the third column of the GTF considered for counting. Other types will be ignored. Default: exon
-
-
-Step 10
+Step 10: Manual calculation of RPKM using spreadsheet
 ---
 
-Read counts per TE generated in previous step will be placed (copy-paste) in annotation file to corresponding TE.
+Read counts per TE generated in previous step will be placed ("copy-paste") in annotation file to corresponding TE.
 
    Here:	
    For each experimental point, RPKM and RPKM mean of the replicates has to be calculated manually.
@@ -135,8 +100,10 @@ Read counts per TE generated in previous step will be placed (copy-paste) in ann
    Outfile should contain following columns:
    readcount_Rep1; RPKM_rep1; readcount_Rep2; RPKM; (...) avegerage_RPKM_all_replicates
 
-Step 11
+Step 11: Setting RPKM threshold for expressed TEs
 ---
+Substep 1:
+-
 
 RPKM threshold in COMEX
    Most TEs are not transcribed or show just background transcription which may be difficult to validate in a biological experiment. Therefore, TEs with RPKM below specific threshold will be considered as not-transcribed. After step10 calculations have to be done on the file on the basis of RPKM-threshold.
@@ -163,13 +130,12 @@ Outfile will have added the following fields(Column):
 
    Outfile name has to be defined in command line
 
-
    SCRIPT: "result_calc.py"
 
    Command_Line: python reasult_calc.py > filename
 
 
-Step 12
+Substep 2: 
 ---	
 
 Output from here will include only the families with RPKM ≥ 0.55 and different fields from step 11.
@@ -200,39 +166,9 @@ Step 15
 
 Calculation of differential expression using DEseq package in "R" program.
 
-   A tab-delimited table as an infile has to be created containing normalized read_counts from step 10 or 14 (for example see DEseq sample file).
-
-   http://cartwrightlab.wikispaces.com/DESeq
-
-   Command Line in R
-
-   source("http://bioconductor.org/biocLite.R")
-
-   biocLite("DESeq")
-
-   library("DESeq")
-
-   count_table<- read.table("input.txt", header=T,row.names=1)
-
-   head(count_table)
-
-   conds<-factor(c("a","a","b","b"))
-
-   library("DESeq")
-
-   cds<-newCountDataSet(count_table,conds)
-
-   head(counts(cds))
-
-   cds<-estimateSizeFactors(cds)
-
-   sizeFactors(cds)
-
-   cds<-estimateDispersions(cds,fitType="local")
-
-   res<-nbinomTest(cds, "a","b")
-
-   write.csv(res, "outputname.txt")
+   A tab-delimited table as an infile has to be created containing normalized read_counts from step 10 or 14 (for example see DEseq sample file). Run DESeq-COMEX2.0.R in R
+   
+   - SCRIPT: DESeq-COMEX2.0.R
 
    Output from here should be pasted into the outfile from step 14.
 
