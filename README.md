@@ -44,7 +44,7 @@ Within this step the mapped-reads will be checked for multiple mapping across di
 
 	SCRIPT: "comex2.0.sh"
 	
-	COMMAN LINE: ./comex2.0
+	COMMAND LINE: ./comex2.0
 	subsequently you will be asked to name mapping.bam-file, annotation-file and genome.fas (genome.fas needs to be indexed)
 
 EXAMPLE
@@ -55,7 +55,7 @@ Tasks of comet.sh
 
    SCRIPT: samtools view -h $InputBam >$input'.sam'
 
-2. 	For further processing of the sam-file ends need to be generated. Output file will be generated within the script and has to be named within the script before running.
+2. 	For further processing of the sam-file ends need to be generated.
 
    SCRIPT: "ToPrint_end1.py"
 
