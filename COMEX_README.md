@@ -4,7 +4,7 @@ COMparative EXpression of transposable elements (COMEX)
 Purpose
 ---
 
-Analysis of transcript amounts from transposable elements (TEs) using RNA-sequencing data. TEs are usually highly repetitive, which causes frequent multi-mapping of the short reads. In addition, RNA-sequencing reads may map to protein coding domains of closely related TE families, which may lead to false positive candidates for down-steam analyses. COMEX was designed to filter reads mapping across TE families, but retain reads mapping to a single TE family and then estimate TE transcript amounts using either uniquely or also multiply mapping reads.
+Analysis of transcript amounts from transposable elements (TEs) using RNA-sequencing data. TEs are usually highly repetitive, which causes frequent multi-mapping of the short reads. In addition, RNA-sequencing reads may map to protein coding domains of closely related TE families, which may lead to false positive candidates for down-stream analyses. COMEX was designed to filter reads mapping across TE families, but retain reads mapping to a single TE family and then estimate TE transcript amounts using either uniquely or also multiply mapping reads.
 
 System requirements
 ---
@@ -13,13 +13,35 @@ System requirements
 2. samtools and bedtools needed
 3. spreadsheet program i.e. Microsoft Excel or LibreOffice Spreadsheet
 
-COMEX Pipeline
+Bugfixes COMEX2.0 -> COMEX2.1
+---
+Some Bugfixes were corrected improving COMEX run and compatibility. Thanks to Annika Mutz and Ben Luis Hack for recognizing and correcting those errors.
+
+1. Corrected .gff column dependencies in "new_cases.py" line 24 & 25. Previous script has chosen name column as integer leading to a run error.
+
+2. Input file format of of TE annotation file needs to be converted from original "TE_annotation.gff" as follows to complete COMEX2.0 run calcuation:
+
+Chromosome	start	end	length	family		superfamily	ID
+Chr1		1	114	113	ATREP18		DNA	 	1
+Chr1		55676	56576	900	SIMPLEHAT1	DNA/hAT	 	2
+Chr1		76844	77435	591	TA11		LINE/L1	 	3
+Chr1		82746	82842	96	ATLINE1_11	LINE/L1	 	4
+Chr1		154338	154420	82	ATLINE1_3A	LINE/L1	 	5
+Chr1		256110	256653	543	ATHPOGON1	DNA/TcMar-Pogo	6
+Chr1		257710	258629	919	AT9NMU1		DNA/MuDR	7
+Chr1		258637	258688	51	Vandal22	DNA/MuDR	8
+
+3. Added "summary.py" needed in Step 11; substep 2 to COMEX2.1.zip.
+
+4. Numbering of Steps were corrected.
+
+COMEX2.1 Pipeline
 ---
 
 Step 1: Discard multiple-mapping reads that map across TE-families 
 ---
 
-Within this step the mapped-reads will be checked for multiple mapping across different TE families and subsequently discarded if so. This step is merged into a single pipeline that runs via a shell-script. Pipeline-scripts are in pyhton. Corresponding scripts are provided. All files need to be in the same folder. We recommend using one filder for each library. The script runs from 35 minutes up to 12 hours depending on the number of reads and the technical specifications.
+Within this step the mapped-reads will be checked for multiple mapping across different TE families and subsequently discarded if so. This step is merged into a single pipeline that runs via a shell-script. Pipeline-scripts are in python. Corresponding scripts are provided. All files need to be in the same folder. We recommend using one folder for each library. The script runs from 35 minutes up to 12 hours depending on the number of reads and the technical specifications.
 
 	SCRIPT: "comex2.0.sh"
 	
@@ -53,15 +75,15 @@ Tasks of comet.sh
 
    SCRIPT: "new_cases1.py"
 
-5. 	Uniquely mapping reads and outfile from previous step (multiple mapping reads that do not map across TE families) are merged for further analysis. 
+6. 	Uniquely mapping reads and outfile from previous step (multiple mapping reads that do not map across TE families) are merged for further analysis. 
 
    SCRIPT: cat $input'_multiplecorrected.sam' $input'_uniquelymapped_reads.sam' >$input'_merged.sam'
 
-6. 	Removes the ends generated in step 2. Otherwise the program will change the .sam file format, and will compromise its use for read counting.
+7. 	Removes the ends generated in step 2. Otherwise the program will change the .sam file format, and will compromise its use for read counting.
 	
    SCRIPT: "Remove_end1.py"
 
-7. 	Outfile from the previous step is converted into bam-file.
+8. 	Outfile from the previous step is converted into bam-file.
 
    Command Line: samtools view -bT refference_genome.fa outfile_prev_step.sam > outfile.bam
 
@@ -92,7 +114,7 @@ Step 2: Counting mapped reads per TE using qualimap
  	
  	-type <arg> -> Value of the third column of the GTF considered for counting. Other types will 					be ignored. Default: exon 
 
-Step 10: Manual calculation of RPKM using spreadsheet
+Step 3: Manual calculation of RPKM using spreadsheet
 ---
 
 Read counts per TE generated in previous step will be placed ("copy-paste") in annotation file to corresponding TE.
@@ -104,7 +126,7 @@ Read counts per TE generated in previous step will be placed ("copy-paste") in a
    Outfile should contain following columns:
    readcount_Rep1; RPKM_rep1; readcount_Rep2; RPKM; (...) avegerage_RPKM_all_replicates
 
-Step 11: Setting RPKM threshold for expressed TEs
+Step 4: Setting RPKM threshold for expressed TEs
 ---
 Substep 1:
 -
@@ -139,7 +161,7 @@ Outfile will have added the following fields(Column):
    Command_Line: python reasult_calc.py > filename
 
 
-Substep 2: 
+Substep 5: 
 ---	
 
 Output from here will include only the families with RPKM ≥ 0.55 and different fields from step 11.
@@ -148,7 +170,7 @@ Output from here will include only the families with RPKM ≥ 0.55 and different
 
    COMMAND LINE: python summary.py > filename
 
-Step 13
+Step 6:
 ---	
 
 Species-specific outputs from step 12 can be used for comparative TE transcription analysis. Only the families expressed in multiple species will be used for comparison. TE families which are not expressed within the other species will be listen within outfile. Location and name of infile has to be defined within the script. Outfile name has to be defined in command line
@@ -157,7 +179,7 @@ Species-specific outputs from step 12 can be used for comparative TE transcripti
 
    Command Line: python match.py > filename
 
-Step 14
+Step 7:
 ---
 
 OPTIONAL for direct inter-specific comparisons of transcript amounts from different TE families: To normalize for TE length and number of copies per TE family, the read count outfile from step 13 has to be opened in a spreadsheet program. Create a new column and use following formula to normalise the read counts to the length of TE per species.
@@ -165,7 +187,7 @@ OPTIONAL for direct inter-specific comparisons of transcript amounts from differ
    Normalization for Species A = (sum of exp_length_speciesB/ sum of exp_length_species A)* Read count species A
 
 
-Step 15
+Step 8:
 ---
 
 Calculation of differential expression using DEseq package in "R" program.
