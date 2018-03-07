@@ -4,7 +4,7 @@ COMparative EXpression of transposable elements (COMEX)
 Purpose
 ---
 
-Analysis of transcript amounts from transposable elements (TEs) using RNA-sequencing data. TEs are usually highly repetitive, which causes frequent multi-mapping of the short reads. In addition, RNA-sequencing reads may map to protein coding domains of closely related TE families, which may lead to false positive candidates for down-steam analyses. COMEX was designed to filter reads mapping across TE families, but retain reads mapping to a single TE family and then estimate TE transcript amounts using either uniquely or also multiply mapping reads.
+Analysis of transcript amounts from transposable elements (TEs) using RNA-sequencing data. TEs are usually highly repetitive, which causes frequent multi-mapping of the short reads. In addition, RNA-sequencing reads may map to protein coding domains of closely related TE families, which may lead to false positive candidates for down-stream analyses. COMEX was designed to filter reads mapping across TE families, but retain reads mapping to a single TE family and then estimate TE transcript amounts using either uniquely or also multiply mapping reads.
 
 System requirements
 ---
@@ -13,7 +13,28 @@ System requirements
 2. samtools and bedtools needed
 3. spreadsheet program i.e. Microsoft Excel or LibreOffice Spreadsheet
 
-COMEX Pipeline
+Bugfixes COMEX2.0 -> COMEX2.1
+---
+Some Bugfixes were corrected improving COMEX run and compatibility. Thanks to Annika Mutz and Ben Luis Hack for recognizing and correcting those errors.
+
+1. Corrected .gff column dependencies in "new_cases.py" line 24 & 25. Previous script has chosen name column as integer leading to a run error.
+
+2. Input file format of of TE annotation file needs to be converted from original "TE_annotation.gff" as follows to complete COMEX2.0 run calcuation:
+
+|Chromosome	|start	|end	|length	|family		|superfamily	|ID |
+|---------------|-------|-------|-------|---------------|---------------|---|
+|Chr1		|1	|114	|113	|ATREP18	|DNA	 	|1  |
+|Chr1		|55676	|56576	|900	|SIMPLEHAT1	|DNA/hAT 	|2  |
+|Chr1		|76844	|77435	|591	|TA11		|LINE/L1 	|3  |
+|Chr1		|82746	|82842	|96	|ATLINE1_11	|LINE/L1 	|4  |
+|Chr1		|154338	|154420	|82	|ATLINE1_3A	|LINE/L1 	|5  |
+|Chr1		|256110	|256653	|543	|ATHPOGON1	|DNA/TcMar-Pogo	|6  |
+|Chr1		|257710	|258629	|919	|AT9NMU1	|DNA/MuDR	|7  |
+|Chr1		|258637	|258688	|51	|Vandal22	|DNA/MuDR	|8  |
+
+3. Added "summary.py" needed in Step 11; substep 2 to COMEX2.1.zip.
+
+COMEX2.1 Pipeline
 ---
 
 Step 1: Discard multiple-mapping reads that map across TE-families 
@@ -53,15 +74,15 @@ Tasks of comet.sh
 
    SCRIPT: "new_cases1.py"
 
-5. 	Uniquely mapping reads and outfile from previous step (multiple mapping reads that do not map across TE families) are merged for further analysis. 
+6. 	Uniquely mapping reads and outfile from previous step (multiple mapping reads that do not map across TE families) are merged for further analysis. 
 
    SCRIPT: cat $input'_multiplecorrected.sam' $input'_uniquelymapped_reads.sam' >$input'_merged.sam'
 
-6. 	Removes the ends generated in step 2. Otherwise the program will change the .sam file format, and will compromise its use for read counting.
+7. 	Removes the ends generated in step 2. Otherwise the program will change the .sam file format, and will compromise its use for read counting.
 	
    SCRIPT: "Remove_end1.py"
 
-7. 	Outfile from the previous step is converted into bam-file.
+8. 	Outfile from the previous step is converted into bam-file.
 
    Command Line: samtools view -bT refference_genome.fa outfile_prev_step.sam > outfile.bam
 
@@ -76,17 +97,21 @@ Step 2: Counting mapped reads per TE using qualimap
 
    Command Line: qualimap comp-counts [-algorithm <arg>] -bam <arg> -gtf <arg> [-id <arg>] [-out <arg>] [-protocol <arg>] [-type <arg>]
 
- -algorithm <arg>   uniquely-mapped-reads(default) or proportional
- -b                 calculate 5' and 3' coverage bias
- -bam <arg>         mapping file in BAM format)
- -gtf <arg>         region file in GTF format
- -id <arg>          attribute of the GTF to be used as feature ID. Regions with
-                    the same /ID will be aggregated as part of the same feature.
-                    Default: gene_id.
- -out <arg>         path to output file
- -protocol <arg>    forward-stranded,reverse-stranded or non-strand-specific
- -type <arg>        Value of the third column of the GTF considered for
-                    counting. Other types will be ignored. Default: exon 
+	-algorithm <arg> -> uniquely-mapped-reads(default) or proportional
+	
+	-b -> calculate 5' and 3' coverage bias
+	
+ 	-bam <arg> -> mapping file in BAM format)
+ 	
+ 	-gtf <arg> -> region file in GTF format
+ 	
+ 	-id <arg> -> attribute of the GTF to be used as feature ID. Regions with the same /ID will be 					aggregated as part of the same feature. Default: gene_id.
+                    		
+ 	-out <arg> -> path to output file
+ 	
+ 	-protocol <arg> -> forward-stranded,reverse-stranded or non-strand-specific
+ 	
+ 	-type <arg> -> Value of the third column of the GTF considered for counting. Other types will 					be ignored. Default: exon 
 
 Step 10: Manual calculation of RPKM using spreadsheet
 ---
@@ -182,3 +207,9 @@ Infile needs to be defined in the script. Outfile needs to be named in command l
    Script: countFile.py
 
    Command line: python countFile.py > outfile
+
+
+
+
+
+
