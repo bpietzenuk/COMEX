@@ -21,15 +21,16 @@ Some Bugfixes were corrected improving COMEX run and compatibility. Thanks to An
 
 2. Input file format of of TE annotation file needs to be converted from original "TE_annotation.gff" as follows to complete COMEX2.0 run calcuation:
 
-Chromosome	start	end	length	family		superfamily	ID
-Chr1		1	114	113	ATREP18		DNA	 	1
-Chr1		55676	56576	900	SIMPLEHAT1	DNA/hAT	 	2
-Chr1		76844	77435	591	TA11		LINE/L1	 	3
-Chr1		82746	82842	96	ATLINE1_11	LINE/L1	 	4
-Chr1		154338	154420	82	ATLINE1_3A	LINE/L1	 	5
-Chr1		256110	256653	543	ATHPOGON1	DNA/TcMar-Pogo	6
-Chr1		257710	258629	919	AT9NMU1		DNA/MuDR	7
-Chr1		258637	258688	51	Vandal22	DNA/MuDR	8
+|Chromosome	|start	|end	|length	|family		|superfamily	|ID |
+|---------------|-------|-------|-------|---------------|---------------|---|
+|Chr1		|1	|114	|113	|ATREP18	|DNA	 	|1  |
+|Chr1		|55676	|56576	|900	|SIMPLEHAT1	|DNA/hAT 	|2  |
+|Chr1		|76844	|77435	|591	|TA11		|LINE/L1 	|3  |
+|Chr1		|82746	|82842	|96	|ATLINE1_11	|LINE/L1 	|4  |
+|Chr1		|154338	|154420	|82	|ATLINE1_3A	|LINE/L1 	|5  |
+|Chr1		|256110	|256653	|543	|ATHPOGON1	|DNA/TcMar-Pogo	|6  |
+|Chr1		|257710	|258629	|919	|AT9NMU1	|DNA/MuDR	|7  |
+|Chr1		|258637	|258688	|51	|Vandal22	|DNA/MuDR	|8  |
 
 3. Added "summary.py" needed in Step 11; substep 2 to COMEX2.1.zip.
 
