@@ -13,6 +13,10 @@ System requirements
 2. samtools and bedtools needed
 3. spreadsheet program i.e. Microsoft Excel or LibreOffice Spreadsheet
 
+Bugfixes COMEX2.1 -> COMEX2.2
+---
+1. Changing columns assignment in new_cases1.py fitting to TE annotation file (see below).  
+
 Bugfixes COMEX2.0 -> COMEX2.1
 ---
 Some Bugfixes were corrected improving COMEX run and compatibility. Thanks to Annika Mutz and Ben Luis Hack for recognizing and correcting those errors.
